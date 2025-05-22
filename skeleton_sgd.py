@@ -66,5 +66,60 @@ def SGD_hinge(data, labels, C, eta_0, T):
 #################################
 
 # Place for additional code
+def cross_validate_eta0_plot(train_data, train_labels, validation_data, validation_labels, T=1000, C=1, num_runs=10):
+    """
+    Runs cross-validation to select eta_0 using average validation accuracy over 10 runs.
+    Shows and saves a plot of validation accuracy as a function of eta_0 (log scale).
+
+    Args:
+        train_data: training features
+        train_labels: training labels
+        validation_data: validation features
+        validation_labels: validation labels
+        T: number of SGD iterations (default 1000)
+        C: regularization constant (default 1)
+        num_runs: number of runs to average per eta_0 (default 10)
+    """
+    from sklearn.metrics import accuracy_score
+    import matplotlib.pyplot as plt
+
+    eta0_values = [10 ** i for i in range(-5, 6)]  # 10^-5 to 10^5
+    avg_accuracies = []
+
+    for eta_0 in eta0_values:
+        accs = []
+        for _ in range(num_runs):
+            w = SGD_hinge(train_data, train_labels, C, eta_0, T)
+            preds = np.sign(validation_data @ w)
+
+            if np.any(np.isnan(preds)) or np.any(np.isinf(preds)):
+                continue  # skip unstable runs
+
+            acc = accuracy_score(validation_labels, preds)
+            accs.append(acc)
+
+        mean_acc = np.mean(accs) if accs else float('nan')
+        avg_accuracies.append(mean_acc)
+
+    # Plot results
+    plt.figure(figsize=(10, 6))
+    plt.semilogx(eta0_values, avg_accuracies, marker='o')
+    plt.xlabel("eta_0 (log scale)")
+    plt.ylabel("Average validation accuracy")
+    plt.title("Validation Accuracy vs eta_0 (T=1000, C=1)")
+    plt.grid(True)
+    plt.savefig("eta0_validation_plot.png")
+    plt.show()
+
+def main():
+    # Load the data
+    train_data, train_labels, validation_data, validation_labels, _, _ = helper()
+
+    # Run part (a): cross-validate eta_0 and save the plot
+    cross_validate_eta0_plot(train_data, train_labels, validation_data, validation_labels)
+
+if __name__ == "__main__":
+    print("hello\n")
+    main()
 
 #################################
