@@ -44,8 +44,23 @@ def SGD_hinge(data, labels, C, eta_0, T):
     """
     Implements SGD for hinge loss.
     """
-    # TODO: Implement me
-    pass
+    n_samples, n_features=data.shape
+    w=np.zeros(n_features)
+
+    for t in range(1,T + 1):
+        eta_t=eta_0/t
+        i=np.random.randint(n_samples)
+        x_i=data[i]
+        y_i=labels[i]
+
+        margin=y_i * np.dot(w,x_i)
+
+        if margin<1:
+            w=(1-eta_t)*w + eta_t*C*y_i*x_i
+        else:
+            w=(1-eta_t)*w
+
+    return w
 
 
 #################################
