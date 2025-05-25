@@ -139,12 +139,65 @@ def cross_validate_eta0_plot(train_data, train_labels, validation_data, validati
     plt.savefig("eta0_validation_plot.png")
     plt.show()
 
-def main():
-    # Load the data
-    train_data, train_labels, validation_data, validation_labels, _, _ = helper()
 
-    # Run part (a): cross-validate eta_0 and save the plot
+def cross_validate_C_plot(
+    train_data,
+    train_labels,
+    validation_data,
+    validation_labels,
+    eta0_best=10,
+    T=1000,
+    num_runs=10
+):
+    """
+    Cross-validate to find the best C, keeping eta_0 fixed (best from part (a)).
+    For each C on a log scale, run SGD_hinge `num_runs` times, average the
+    validation accuracy, and plot/save the curve.
+
+    Args
+    ----
+    train_data, train_labels         : training set
+    validation_data, validation_labels : validation set
+    eta0_best (float)                : the learning-rate chosen in part (a)
+    T (int)                          : SGD iterations per run (default 1000)
+    num_runs (int)                   : runs to average per C (default 10)
+    """
+
+    C_values = [10 ** i for i in range(-5, 6)]
+    avg_accuracies = []
+
+    for C in C_values:
+        accs = []
+        for _ in range(num_runs):
+            w = SGD_hinge(train_data, train_labels, C, eta0_best, T)
+
+            # If you wrote custom predictor / accuracy functions, use them:
+            margins = my_linear_predict(validation_data, w)
+            preds = np.sign(margins)
+            if np.any(np.isnan(preds)) or np.any(np.isinf(preds)):
+                continue  # skip unstable run
+            acc = my_accuracy_score(validation_labels, preds)
+            accs.append(acc)
+
+        mean_acc = np.mean(accs) if accs else 0.0
+        avg_accuracies.append(mean_acc)
+
+    # Plot
+    plt.figure(figsize=(10, 6))
+    plt.semilogx(C_values, avg_accuracies, marker='o')
+    plt.xlabel("C (log scale)")
+    plt.ylabel("Average validation accuracy")
+    plt.title(f"Validation Accuracy vs C (T={T}, eta_0={eta0_best})")
+    plt.grid(True)
+    plt.savefig("C_validation_plot.png")
+    plt.show()
+
+def main():
+    train_data, train_labels, validation_data, validation_labels, _, _ = helper()
+    #part (a)
     cross_validate_eta0_plot(train_data, train_labels, validation_data, validation_labels)
+    #part (b)
+    cross_validate_C_plot(train_data, train_labels, validation_data, validation_labels)
 
 if __name__ == "__main__":
     print("hello\n")
