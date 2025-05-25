@@ -170,16 +170,13 @@ def cross_validate_C_plot(
         accs = []
         for _ in range(num_runs):
             w = SGD_hinge(train_data, train_labels, C, eta0_best, T)
-
-            # If you wrote custom predictor / accuracy functions, use them:
-            margins = my_linear_predict(validation_data, w)
-            preds = np.sign(margins)
+            preds = np.sign(my_linear_predict(validation_data, w))
             if np.any(np.isnan(preds)) or np.any(np.isinf(preds)):
                 continue  # skip unstable run
             acc = my_accuracy_score(validation_labels, preds)
             accs.append(acc)
 
-        mean_acc = np.mean(accs) if accs else 0.0
+        mean_acc = np.mean(accs) if accs else np.nan
         avg_accuracies.append(mean_acc)
 
     # Plot
@@ -191,6 +188,8 @@ def cross_validate_C_plot(
     plt.grid(True)
     plt.savefig("C_validation_plot.png")
     plt.show()
+
+
 
 def main():
     train_data, train_labels, validation_data, validation_labels, _, _ = helper()
