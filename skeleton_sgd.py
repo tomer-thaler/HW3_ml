@@ -7,6 +7,7 @@ import numpy as np
 import numpy.random
 from sklearn.datasets import fetch_openml
 import sklearn.preprocessing
+import matplotlib.pyplot as plt
 
 """
 Please use the provided function signature for the SGD implementation.
@@ -66,6 +67,34 @@ def SGD_hinge(data, labels, C, eta_0, T):
 #################################
 
 # Place for additional code
+
+def my_accuracy_score(y_true, y_pred):
+    """
+    Computes the fraction of correctly predicted labels.
+    Args:
+        y_true: true labels (numpy array of +1/-1)
+        y_pred: predicted labels (numpy array of +1/-1)
+    Returns:
+        Accuracy as a float between 0 and 1.
+    """
+    correct = np.sum(y_true == y_pred)
+    return correct / len(y_true)
+
+def my_linear_predict(X, w):
+    """
+    Computes the vector of dot products w^T x_i for each row x_i in X.
+    Args:
+        X: shape (n_samples, n_features) — data matrix
+        w: shape (n_features,) — weight vector
+    Returns:
+        predictions: shape (n_samples,) — real-valued margins
+    """
+    n_samples = X.shape[0]
+    predictions = np.zeros(n_samples)
+    for i in range(n_samples):
+        predictions[i] = np.dot(w, X[i])
+    return predictions
+
 def cross_validate_eta0_plot(train_data, train_labels, validation_data, validation_labels, T=1000, C=1, num_runs=10):
     """
     Runs cross-validation to select eta_0 using average validation accuracy over 10 runs.
@@ -80,8 +109,7 @@ def cross_validate_eta0_plot(train_data, train_labels, validation_data, validati
         C: regularization constant (default 1)
         num_runs: number of runs to average per eta_0 (default 10)
     """
-    from sklearn.metrics import accuracy_score
-    import matplotlib.pyplot as plt
+
 
     eta0_values = [10 ** i for i in range(-5, 6)]  # 10^-5 to 10^5
     avg_accuracies = []
@@ -90,15 +118,15 @@ def cross_validate_eta0_plot(train_data, train_labels, validation_data, validati
         accs = []
         for _ in range(num_runs):
             w = SGD_hinge(train_data, train_labels, C, eta_0, T)
-            preds = np.sign(validation_data @ w)
+            preds = np.sign(my_linear_predict(validation_data,w))
 
             if np.any(np.isnan(preds)) or np.any(np.isinf(preds)):
                 continue  # skip unstable runs
 
-            acc = accuracy_score(validation_labels, preds)
+            acc = my_accuracy_score(validation_labels, preds)
             accs.append(acc)
 
-        mean_acc = np.mean(accs) if accs else float('nan')
+        mean_acc = np.mean(accs) if accs else 0.0
         avg_accuracies.append(mean_acc)
 
     # Plot results
