@@ -189,14 +189,39 @@ def cross_validate_C_plot(
     plt.savefig("C_validation_plot.png")
     plt.show()
 
+def visualize_weights(train_data, train_labels, C, eta_0, T=20000):
+    """
+    Trains SGD with given C and eta_0 on the training data for T=20000,
+    and displays the weight vector w as a 28x28 image using only the required method.
+    """
+    w = SGD_hinge(train_data, train_labels, C, eta_0, T)
+    plt.imshow(np.reshape(w, (28, 28)), interpolation='nearest')
+    plt.show()
+    return w
+
+def test_accuracy(test_data, test_labels, w):
+    """
+    Computes the accuracy of the classifier defined by weight vector w
+    on the test set.
+    """
+    preds = np.sign(my_linear_predict(test_data, w))
+    acc = my_accuracy_score(test_labels, preds)
+    print(f"Test set accuracy: {acc:.4f}")
+    return acc
 
 
 def main():
-    train_data, train_labels, validation_data, validation_labels, _, _ = helper()
+    train_data, train_labels, validation_data, validation_labels, test_data, test_labels= helper()
     #part (a)
     cross_validate_eta0_plot(train_data, train_labels, validation_data, validation_labels)
     #part (b)
     cross_validate_C_plot(train_data, train_labels, validation_data, validation_labels)
+    # Part (c)
+    best_eta_0 = 10
+    best_C = 1e-5
+    w_final = visualize_weights(train_data, train_labels, C=best_C, eta_0=best_eta_0)
+    # Part (d)
+    test_accuracy(test_data, test_labels, w_final)
 
 if __name__ == "__main__":
     print("hello\n")
