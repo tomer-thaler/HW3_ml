@@ -196,6 +196,8 @@ def visualize_weights(train_data, train_labels, C, eta_0, T=20000):
     """
     w = SGD_hinge(train_data, train_labels, C, eta_0, T)
     plt.imshow(np.reshape(w, (28, 28)), interpolation='nearest')
+    plt.savefig("best_weight_visualization.png")
+
     plt.show()
     return w
 
@@ -206,7 +208,7 @@ def test_accuracy(test_data, test_labels, w):
     """
     preds = np.sign(my_linear_predict(test_data, w))
     acc = my_accuracy_score(test_labels, preds)
-    print(f"Test set accuracy: {acc:.4f}")
+    print(f"Test set accuracy: {acc}")
     return acc
 
 
