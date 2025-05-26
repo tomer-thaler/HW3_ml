@@ -43,7 +43,7 @@ def helper():
 
 def SGD_hinge(data, labels, C, eta_0, T):
     """
-    Implements SGD for hinge loss.
+    Implements SGD with hinge loss.
     """
     n_samples, n_features=data.shape
     w=np.zeros(n_features)
