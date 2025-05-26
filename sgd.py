@@ -43,18 +43,18 @@ def helper():
 
 def SGD_hinge(data, labels, C, eta_0, T):
     """
-    Implements SGD with hinge loss.
+    SGD with hinge loss.
     """
     n_samples, n_features=data.shape
     w=np.zeros(n_features)
 
-    for t in range(1,T + 1):
+    for t in range(1,T+1):
         eta_t=eta_0/t
         i=np.random.randint(n_samples)
         x_i=data[i]
         y_i=labels[i]
 
-        margin=y_i * np.dot(w,x_i)
+        margin=y_i*np.dot(w,x_i)
 
         if margin<1:
             w=(1-eta_t)*w + eta_t*C*y_i*x_i
@@ -65,68 +65,45 @@ def SGD_hinge(data, labels, C, eta_0, T):
 
 
 #################################
-
 # Place for additional code
 
 def my_accuracy_score(y_true, y_pred):
     """
-    Computes the fraction of correctly predicted labels.
-    Args:
-        y_true: true labels (numpy array of +1/-1)
-        y_pred: predicted labels (numpy array of +1/-1)
-    Returns:
-        Accuracy as a float between 0 and 1.
+    Accuracy score.
     """
-    correct = np.sum(y_true == y_pred)
-    return correct / len(y_true)
+    correct=np.sum(y_true==y_pred)  # count how many are correct
+    return correct/len(y_true)  # divide by total
 
 def my_linear_predict(X, w):
     """
-    Computes the vector of dot products w^T x_i for each row x_i in X.
-    Args:
-        X: shape (n_samples, n_features) — data matrix
-        w: shape (n_features,) — weight vector
-    Returns:
-        predictions: shape (n_samples,) — real-valued margins
+    Predict margins.
     """
-    n_samples = X.shape[0]
-    predictions = np.zeros(n_samples)
+    n_samples=X.shape[0]
+    predictions=np.zeros(n_samples)
     for i in range(n_samples):
-        predictions[i] = np.dot(w, X[i])
+        predictions[i]=np.dot(w,X[i])  # compute w^T x_i
     return predictions
 
 def cross_validate_eta0_plot(train_data, train_labels, validation_data, validation_labels, T=1000, C=1, num_runs=10):
     """
-    Runs cross-validation to select eta_0 using average validation accuracy over 10 runs.
-    Shows and saves a plot of validation accuracy as a function of eta_0 (log scale).
-
-    Args:
-        train_data: training features
-        train_labels: training labels
-        validation_data: validation features
-        validation_labels: validation labels
-        T: number of SGD iterations (default 1000)
-        C: regularization constant (default 1)
-        num_runs: number of runs to average per eta_0 (default 10)
+    Findes best eta_0.
     """
-
-
-    eta0_values = [10 ** i for i in range(-5, 6)]  # 10^-5 to 10^5
-    avg_accuracies = []
+    eta0_values=[10**i for i in range(-5,6)]
+    avg_accuracies=[]
 
     for eta_0 in eta0_values:
-        accs = []
+        accs=[]
         for _ in range(num_runs):
-            w = SGD_hinge(train_data, train_labels, C, eta_0, T)
-            preds = np.sign(my_linear_predict(validation_data,w))
+            w=SGD_hinge(train_data, train_labels, C, eta_0, T)
+            preds=np.sign(my_linear_predict(validation_data,w))
 
             if np.any(np.isnan(preds)) or np.any(np.isinf(preds)):
-                continue  # skip unstable runs
+                continue  # skip bad run
 
-            acc = my_accuracy_score(validation_labels, preds)
+            acc=my_accuracy_score(validation_labels, preds)
             accs.append(acc)
 
-        mean_acc = np.mean(accs) if accs else 0.0
+        mean_acc=np.mean(accs) if accs else 0.0
         avg_accuracies.append(mean_acc)
 
     # Plot results
@@ -139,44 +116,24 @@ def cross_validate_eta0_plot(train_data, train_labels, validation_data, validati
     plt.savefig("eta0_validation_plot.png")
     plt.show()
 
-
-def cross_validate_C_plot(
-    train_data,
-    train_labels,
-    validation_data,
-    validation_labels,
-    eta0_best=10,
-    T=1000,
-    num_runs=10
-):
+def cross_validate_C_plot(train_data, train_labels, validation_data, validation_labels, eta0_best=10, T=1000, num_runs=10):
     """
-    Cross-validate to find the best C, keeping eta_0 fixed (best from part (a)).
-    For each C on a log scale, run SGD_hinge `num_runs` times, average the
-    validation accuracy, and plot/save the curve.
-
-    Args
-    ----
-    train_data, train_labels         : training set
-    validation_data, validation_labels : validation set
-    eta0_best (float)                : the learning-rate chosen in part (a)
-    T (int)                          : SGD iterations per run (default 1000)
-    num_runs (int)                   : runs to average per C (default 10)
+    Find best C.
     """
-
-    C_values = [10 ** i for i in range(-5, 6)]
-    avg_accuracies = []
+    C_values=[10**i for i in range(-5,6)]
+    avg_accuracies=[]
 
     for C in C_values:
-        accs = []
+        accs=[]
         for _ in range(num_runs):
-            w = SGD_hinge(train_data, train_labels, C, eta0_best, T)
-            preds = np.sign(my_linear_predict(validation_data, w))
+            w=SGD_hinge(train_data, train_labels, C, eta0_best, T)
+            preds=np.sign(my_linear_predict(validation_data, w))
             if np.any(np.isnan(preds)) or np.any(np.isinf(preds)):
-                continue  # skip unstable run
-            acc = my_accuracy_score(validation_labels, preds)
+                continue  # skip bad run
+            acc=my_accuracy_score(validation_labels, preds)
             accs.append(acc)
 
-        mean_acc = np.mean(accs) if accs else np.nan
+        mean_acc=np.mean(accs) if accs else np.nan
         avg_accuracies.append(mean_acc)
 
     # Plot
@@ -189,40 +146,38 @@ def cross_validate_C_plot(
     plt.savefig("C_validation_plot.png")
     plt.show()
 
-def visualize_weights(train_data, train_labels, C, eta_0, T=20000):
+def visualize_weight(train_data, train_labels, C, eta_0, T=20000):
     """
-    Trains SGD with given C and eta_0 on the training data for T=20000,
-    and displays the weight vector w as a 28x28 image using only the required method.
+    Shows chosen weight vector.
     """
-    w = SGD_hinge(train_data, train_labels, C, eta_0, T)
+    w=SGD_hinge(train_data, train_labels, C, eta_0, T)
     plt.imshow(np.reshape(w, (28, 28)), interpolation='nearest')
     plt.savefig("best_weight_visualization.png")
-
     plt.show()
     return w
 
 def test_accuracy(test_data, test_labels, w):
     """
-    Computes the accuracy of the classifier defined by weight vector w
-    on the test set.
+    Test accuracy of best classifier on the test set.
     """
-    preds = np.sign(my_linear_predict(test_data, w))
-    acc = my_accuracy_score(test_labels, preds)
+    preds=np.sign(my_linear_predict(test_data, w))
+    acc=my_accuracy_score(test_labels, preds)
     print(f"Test set accuracy: {acc}")
     return acc
 
 
 def main():
-    train_data, train_labels, validation_data, validation_labels, test_data, test_labels= helper()
+    #load the data using your helper (thanks)
+    train_data, train_labels, validation_data, validation_labels, test_data, test_labels=helper()
     #part (a)
     cross_validate_eta0_plot(train_data, train_labels, validation_data, validation_labels)
     #part (b)
     cross_validate_C_plot(train_data, train_labels, validation_data, validation_labels)
-    # Part (c)
-    best_eta_0 = 10
-    best_C = 1e-5
-    w_final = visualize_weights(train_data, train_labels, C=best_C, eta_0=best_eta_0)
-    # Part (d)
+    #Part (c)
+    best_eta_0=10
+    best_C=1e-5
+    w_final=visualize_weight(train_data, train_labels, C=best_C, eta_0=best_eta_0)
+    #Part (d)
     test_accuracy(test_data, test_labels, w_final)
 
 if __name__ == "__main__":
