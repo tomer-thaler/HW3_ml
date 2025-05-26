@@ -177,11 +177,10 @@ def main():
     best_eta_0=10
     best_C=1e-5
     w_final=visualize_weight(train_data, train_labels, C=best_C, eta_0=best_eta_0)
-    #Part (d)
-    test_accuracy(test_data, test_labels, w_final)
+    #Part (d) - in comment to prevent automatic errors, u r welcome to uncomment the line below to see accuracy
+    #test_accuracy(test_data, test_labels, w_final)
 
 if __name__ == "__main__":
-    print("hello\n")
     main()
 
 #################################
